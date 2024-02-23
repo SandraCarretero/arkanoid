@@ -26,6 +26,38 @@ let leftPressed = false;
 
 const PADDLE_SENS = 5;
 
+// VARIABLES LADRILLOS
+const brickRow = 6;
+const brickColumn = 13;
+const brickWidth = 30;
+const brickHeight = 14;
+const brickPadding = 2;
+const brickTop = 80;
+const brickLeft = 17;
+const bricks = [];
+
+const BRICK_STATUS = {
+	ACTIVE: 1,
+	DESTROYED: 0
+};
+
+for (let i = 0; i < brickColumn; i++) {
+	bricks[i] = [];
+	for (let j = 0; j < brickRow; j++) {
+		// Calculamos posicion ladrillo
+		const brickX = i * (brickWidth + brickPadding) + brickLeft;
+		const brickY = j * (brickHeight + brickPadding) + brickTop;
+		const randomColor = Math.floor(Math.random() * 8);
+
+		bricks[i][j] = {
+			x: brickX,
+			y: brickY,
+			status: BRICK_STATUS.ACTIVE,
+			color: randomColor
+		};
+	}
+}
+
 const drawBall = () => {
 	ctx.beginPath();
 	ctx.arc(positionBallX, positionBallY, ballRadius, 0, Math.PI * 2);
@@ -38,8 +70,41 @@ const drawPaddle = () => {
 	ctx.fillStyle = '#fff';
 	ctx.fillRect(positionPaddleX, positionPaddleY, paddleWidth, paddleHeight);
 };
-const drawBricks = () => {};
-const collisionDetection = () => {};
+const drawBricks = () => {
+	for (let i = 0; i < brickColumn; i++) {
+		for (let j = 0; j < brickRow; j++) {
+			const currentBrick = bricks[i][j];
+			if (currentBrick.status === BRICK_STATUS.DESTROYED) continue;
+
+			ctx.fillStyle = 'yellow';
+			ctx.rect(currentBrick.x, currentBrick.y, brickWidth, brickHeight);
+			ctx.stroke();
+			ctx.fill();
+		}
+	}
+};
+
+const collisionDetection = () => {
+	for (let i = 0; i < brickColumn; i++) {
+		for (let j = 0; j < brickRow; j++) {
+			const currentBrick = bricks[i][j];
+			if (currentBrick.status === BRICK_STATUS.DESTROYED) continue;
+
+			const isBallInsideBrickX =
+				positionBallX + ballRadius > currentBrick.x &&
+				positionBallX - ballRadius < currentBrick.x + brickWidth;
+			const isBallTouchingBrick =
+				positionBallY + ballRadius > currentBrick.y &&
+				positionBallY - ballRadius < currentBrick.y + brickHeight;
+
+			if (isBallInsideBrickX && isBallTouchingBrick) {
+				velocityBallY = -velocityBallY;
+				currentBrick.status = BRICK_STATUS.DESTROYED;
+			}
+		}
+	}
+};
+
 const ballMovement = () => {
 	// Rebotar laterales
 	if (
@@ -64,7 +129,7 @@ const ballMovement = () => {
 		velocityBallY = -velocityBallY;
 	} else if (
 		positionBallY + velocityBallY >
-		canvasElement.height - ballRadius
+		canvasElement.height - ballRadius - paddleHeight
 	) {
 		// console.log('Game Over');
 		document.location.reload();
