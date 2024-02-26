@@ -1,6 +1,8 @@
 import { canvasElement } from './dom';
 
 const ctx = canvasElement.getContext('2d');
+const spriteElement = document.getElementById('sprite')
+const bricksElement = document.getElementById('bricks')
 
 canvasElement.width = 448;
 canvasElement.height = 400;
@@ -29,11 +31,11 @@ const PADDLE_SENS = 5;
 // VARIABLES LADRILLOS
 const brickRow = 6;
 const brickColumn = 13;
-const brickWidth = 30;
-const brickHeight = 14;
-const brickPadding = 2;
+const brickWidth = 32;
+const brickHeight = 16;
+const brickPadding = 0;
 const brickTop = 80;
-const brickLeft = 17;
+const brickLeft = 16;
 const bricks = [];
 
 const BRICK_STATUS = {
@@ -67,8 +69,17 @@ const drawBall = () => {
 };
 
 const drawPaddle = () => {
-	ctx.fillStyle = '#fff';
-	ctx.fillRect(positionPaddleX, positionPaddleY, paddleWidth, paddleHeight);
+	ctx.drawImage(
+		spriteElement,
+		29,
+		174,
+		paddleWidth,
+		paddleHeight,
+		positionPaddleX,
+		positionPaddleY,
+		paddleWidth,
+		paddleHeight
+		)
 };
 const drawBricks = () => {
 	for (let i = 0; i < brickColumn; i++) {
@@ -76,10 +87,18 @@ const drawBricks = () => {
 			const currentBrick = bricks[i][j];
 			if (currentBrick.status === BRICK_STATUS.DESTROYED) continue;
 
-			ctx.fillStyle = 'yellow';
-			ctx.rect(currentBrick.x, currentBrick.y, brickWidth, brickHeight);
-			ctx.stroke();
-			ctx.fill();
+			const clipX = currentBrick.color * 32
+			ctx.drawImage(
+				bricksElement,
+				clipX,
+				0,
+				brickWidth,
+				brickHeight,
+				currentBrick.x,
+				currentBrick.y,
+				brickWidth,
+				brickHeight
+			)
 		}
 	}
 };
